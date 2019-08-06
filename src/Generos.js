@@ -1,6 +1,6 @@
 import React, {useState, useEffect } from 'react';
 import axios from 'axios';
-import { directive } from '@babel/types';
+import { Link } from 'react-router-dom';
 
 const Generos = () => {
     const [data, setData] = useState([]);
@@ -10,28 +10,55 @@ const Generos = () => {
             setData(res.data.data);
         });
     }, []);
+
+    const deletarGenero = id => {
+        axios.delete('/api/genres/' + id)
+        .then(res => {
+            const filtro = data.filter(item => item.id !== id);
+            setData(filtro);
+        });
+    }
+
+    const renderizaLinha = record => {
+        return(
+            <tr key={record.id}>
+                <th scope='row'>{record.id}</th>
+                <td>{record.name}</td>
+                <td>
+                    <Link className='btn btn-warning' to={'/generos/' + record.id}>Editar</Link>
+                    <button onClick={() => deletarGenero(record.id)} type='button' className='btn btn-danger'>X</button>
+                </td>
+            </tr>
+        )
+    }
+
+    if(data.length === 0){
+        return(
+            <div className='container'>
+                <h1>Generos</h1>
+                <div className='alert alert-warning' role='alert'>
+                    Você não possui gêneros criados.
+                </div>
+            </div>
+        )
+    }
+
     return (
-        <div>
-            <h1>Generos</h1>
-            <table class='table'>
+        <div className='container'>
+            <h1>Gêneros</h1>
+            <Link className='btn btn-primary' to='/generos/novo'>Novo Gênero</Link>
+            <table className='table table-striped table-dark'>
                 <thead>
                     <tr>
-                    <th scope='col'>#</th>
-                    <th scope='col'>First</th>
-                    <th scope='col'>Last</th>
-                    <th scope='col'>Handle</th>
+                    <th scope='col'>ID</th>
+                    <th scope='col'>Nome</th>
+                    <th scope='col'>Ações</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                    <th scope='row'>1</th>
-                    <td>Mark</td>
-                    <td>Otto</td>
-                    <td>@mdo</td>
-                    </tr>
+                    {data.map(renderizaLinha)}
                 </tbody>
             </table>
-            <pre>{JSON.stringify(data)}</pre>
         </div>
     );
 }
